@@ -7,15 +7,15 @@
 > `Abstract`
 > &emsp;&emsp;Neural Radiance Field (NeRF), a new novel view synthesis with implicit scene representation has taken the ﬁeld of Computer Vision by storm. As a novel view synthesis and 3D reconstruction method, NeRF models ﬁnd applications in robotics, urban mapping, autonomous navigation, virtual reality/augmented reality, and more. Since the original paper by Mildenhall et al., more than 250 preprints were published, with more than 100 eventually being accepted in tier one Computer Vision Conferences. Given NeRF popularity and the current interest in this research area, we believe it necessary to compile a comprehensive survey of NeRF papers from the past two years, which we organized into both architecture, and application based taxonomies. We also provide an introduction to the theory of NeRF based novel view synthesis, and a benchmark comparison of the performance and speed of key NeRF models. By creating this survey, we hope to introduce new researchers to NeRF, provide a helpful reference for inﬂuential works in this ﬁeld, as well as motivate future research directions with our discussion section.
 > `Index Terms`
-> &emsp;&emsp;Neural Radiance Field, NeRF, Computer Vision Survey, Novel View Synthesis, Neural Rendering, 3D Reconstruction, Multi-view
+> &emsp;&emsp;Neural Radiance Field, NeRF, Computer Vision Survey, Novel View Synthesis, Neural Rendering, 3D Reconstruction, Multi-view<br>
 译文：
-&emsp;&emsp;神经辐射场 (NeRF)，一种具有隐式场景表示的新型视图合成，已经席卷了计算机视觉领域。作为一种新颖的视图合成和 3D 重建方法，NeRF 模型在机器人技术、城市测绘、自主导航、虚拟现实/增强现实等领域都有应用。自 Mildenhall 等人的原始论文以来，已发表了 250 多份预印本，其中 100 多份最终被一级计算机​​视觉会议接受。鉴于 NeRF 的受欢迎程度和当前对该研究领域的兴趣，我们认为有必要对过去两年的 NeRF 论文进行全面调查，我们将其组织成基于架构和基于应用程序的分类法。我们还介绍了基于 NeRF 的新颖视图合成理论，以及关键 NeRF 模型的性能和速度的基准比较。通过创建这项调查，我们希望向 NeRF 介绍新的研究人员，为该领域的有影响力的工作提供有用的参考，并通过我们的讨论部分激发未来的研究方向。
+&emsp;&emsp;神经辐射场 (NeRF)，一种具有隐式场景表示的新型视图合成，已经席卷了计算机视觉领域。作为一种新颖的视图合成和 3D 重建方法，NeRF 模型在机器人技术、城市测绘、自主导航、虚拟现实/增强现实等领域都有应用。自 Mildenhall 等人的原始论文以来，已发表了 250 多份预印本，其中 100 多份最终被一级计算机​​视觉会议接受。鉴于 NeRF 的受欢迎程度和当前对该研究领域的兴趣，我们认为有必要对过去两年的 NeRF 论文进行全面调查，我们将其组织成基于架构和基于应用程序的分类法。我们还介绍了基于 NeRF 的新颖视图合成理论，以及关键 NeRF 模型的性能和速度的基准比较。通过创建这项调查，我们希望向 NeRF 介绍新的研究人员，为该领域的有影响力的工作提供有用的参考，并通过我们的讨论部分激发未来的研究方向。<br>
 神经辐射场、NeRF、计算机视觉调查、新视图合成、神经渲染、3D 重建、多视图
 
 # 文章脉络
-• 第1节引言，简要介绍NeRF的知名度，工作原理和工作领域。（这里不做介绍）
-• 第2节介绍了现有的NeRF，解释了NeRF`体素渲染背后的理论`，介绍了常用的`数据集`和`质量评估指标`。
-• 第3节是本文的核心，并`介绍了有影响力的NeRF`出版物，并包含了我们为组织这些作品而创建的分类法。它的小节详细介绍了过去两年中提出的NeRF创新的不同家族，以及NeRF模型在各种计算机视觉任务中的最新应用。
+• 第1节引言，简要介绍NeRF的知名度，工作原理和工作领域。（这里不做介绍）<br>
+• 第2节介绍了现有的NeRF，解释了NeRF`体素渲染背后的理论`，介绍了常用的`数据集`和`质量评估指标`。<br>
+• 第3节是本文的核心，并`介绍了有影响力的NeRF`出版物，并包含了我们为组织这些作品而创建的分类法。它的小节详细介绍了过去两年中提出的NeRF创新的不同家族，以及NeRF模型在各种计算机视觉任务中的最新应用。<br>
 • 第4节和第5节(`总结与展望`)讨论了潜在的未来研究方向和应用，并总结了调查。
 # 神经辐射场 (NeRF) 概念
 ## 理论介绍
@@ -79,7 +79,9 @@ $$\sigma_{xy}=\sum_iw_i(x_i-\mu_x)(y_i-\mu_y),(14)$$
 &emsp;&emsp;其中$x_i$，$y_i$分别是从参考图像和评估图像中采样的像素。在实践中，对整个图像的$SSIM$分数进行平均。
 ## LPIPS
 &emsp;&emsp;$LPIPS$是使用学习的卷积特征的完整参考质量评估指标。得分由多层特征图的加权像素$MSE$给出。
+
 $$LPIPS(x,y)=\sum_l^L\frac{1}{H_lW_l}\sum_{h,w}^{H_l,W_l}{||w_l\odot x_{hw}^{l}-y_{hw}^{l}||}_2^2,(15)$$
+
 &emsp;&emsp;$x_{hw}^{l}$和$y_{hw}^{l}$是参考和评估图像在像素宽度w，像素高度h和层l处的特征。Hl和Wl是相应层处的特征图高度和宽度。最初的$LPIPS$论文使用SqueezeNet [444]，VGG [34] 和AlexNet [35] 作为特征提取主干。原始纸张使用了五层。原始作者提供了微调和从头开始的配置，但实际上，已按原样使用预先训练的网络。
 # 基于方法分类的NeRF变体
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/813f26f935174975a60bade2bcd0a7c8.png)
@@ -107,8 +109,11 @@ $$LPIPS(x,y)=\sum_l^L\frac{1}{H_lW_l}\sum_{h,w}^{H_l,W_l}{||w_l\odot x_{hw}^{l}-
  - S-NeRF：[https://github.com/esa/snerf](https://github.com/esa/snerf)*代码已开源*
 
 &emsp;&emsp;城市辐射场旨在应用基于NeRF的视图合成和基于激光雷达数据的稀疏多视图图像对城市环境进行3D重建。除了标准的光度损失外，他们还使用基于激光雷达的深度损失$L_{depth}$和视线损失$L_{sight}$，以及基于skybox的分割损失Lseg。这些是由
+
 $$L_{depth} = E[(z − \hat{z}^2)], (30)$$
+
 $$L_{sight}=E\left[ \int_{_{t_1}}^{t_2}{\left( w\left( t \right) −\delta \left( z \right) \right)^2dt} \right] ,(31)$$
+
 $$L_{seg}=E\left[ S_i\left(r\int_{_{t_1}}^{t_2}{\left( w\left( t \right) −\delta \left( z \right) \right)^2dt} \right)\right] ,(32)$$
 
 &emsp;&emsp;$w(t)$ 定义为公式 (3) 中定义的$T(t)σ(t)$。$z$和 $ζ$ 分别是激光雷达测量深度和估计深度 (6)。$Δ (z)$ 是狄拉克 $δ$函数。如果光线穿过第i图像中的天空像素，则$S_i(r) = 1$，其中天空像素通过预训练模型 [145] 被分割，否则为0。深度损失迫使估计的深度 “$z$” 与激光雷达获取的深度匹配。视线损失迫使辐射集中在测量深度的表面。分割损失迫使沿着光线穿过天空像素的点样本具有零密度。通过在体积渲染过程中从NeRF模型中提取点云来执行3D重建。为虚拟相机中的每个像素投射射线。然后，使用估计的深度将点云放置在3D场景中。泊松表面重建用于从此生成的点云构建3D网格。
@@ -131,7 +136,9 @@ $$L_{seg}=E\left[ S_i\left(r\int_{_{t_1}}^{t_2}{\left( w\left( t \right) −\del
  - Animatable NeRF:[https://zju3dv.github.io/animatable_nerf/](https://zju3dv.github.io/animatable_nerf/)*代码已开源*
 
 &emsp;&emsp;人体神经体应用NeRF体绘制来渲染视频中移动姿势的人类。作者首先使用输入视频来锚定基于顶点的可变形人体模型 ($SMPL$[146])。在每个顶点上，作者附加了一个16维潜码$Z$。然后使用人体姿势参数$S$ (最初是在训练过程中从视频中估计的，可以在推理过程中输入) 来变形人体模型。该模型在网格中进行体素化，然后由3D CNN处理，该3D CNN在每个占用的体素处提取128维潜码 (特征)。对于任何3D点$x$，首先将其转换为$SMPL$坐标系，然后通过插值提取128维潜码/特征 $ψ$。这被传递给alpha MLP。RGB MLP还采用了3D坐标 $γ_x(x)$的位置编码和查看方向$γ_d(d)$和外观潜码$l_t$(考虑视频中的每帧差异)。
+
 $$\sigma \left( x \right) =M_\sigma \left( \varphi \left( x|Z，S \right) \right) ,(33)$$
+
 $$c \left( x \right) =M_\sigma \left( \varphi \left( x|Z，S \right)  ,γ_x(x),γ_d(d),lt\right),(34)$$
 
 &emsp;&emsp;标准的NeRF方法与运动物体作斗争，而神经体的网格变形方法能够在框架之间和姿势之间进行插值。来自2021/2022顶级会议的最先进模型，如动画NeRF [144] (2021年5月) 、DoubleField [143] (2021年6月) 、HumanNeRF [141] (2022年1月) 、郑等人 [142] (2022年3月) 也在这一主题上进行了创新。
@@ -177,13 +184,19 @@ $$S(r) = \sum _i^N{T_i\alpha_is_i},(36)$$
 Signed distance functions(SDF) 给出3D点到它们定义的表面的有符号距离 (即，如果在对象内部，则为负距离，如果在外部，则为正距离)。它们通常用于计算机图形学中，以定义曲面，这些曲面是函数的零集。SDF可通过根查找用于表面重建，并可用于定义整个场景几何形状。
 #### Neural Surface
 &emsp;&emsp;神经表面 (NeuS) [136] (2021年6月) 模型像基线NeRF模型一样执行体积渲染。但是，它使用带符号距离函数来定义场景几何形状。它将MLP的密度输出部分替换为输出有符号距离函数值的MLP。然后将在体绘制方程 (2) 中替换 $σ(t)$的密度 $ρ(t)$ 构造为
+
 $$\rho \left( t \right) =max\left( \frac{\frac{−d\varPhi}{dt}\left( f\left( r\left( t \right) \right) \right)}{ \varPhi \left( f\left( r\left( t \right) \right) \right)} ,0 \right) ,(37)$$
+
 &emsp;&emsp;其中 $\varPhi(·)$是$s$形函数，其导数$\frac{d\varPhi}{dt}$是logistic密度分布。作者已经证明了他们的模型优于基线NeRF，并为他们的方法和基于SDF的场景密度的实现提供了理论和实验依据。此方法与UNISERF并发，并且在DTU数据集上优于它 [26]。与UNISURF一样，可以使用在SDF上执行根查找来定义场景的显式表面几何形状。
 #### Others
 &emsp;&emsp;Azinovic等人的同时工作[137] (2021年4月) 也用截断的SDF MLP代替了密度MLP。相反，他们将像素颜色计算为采样颜色的加权总和
+
 $$C\left( r \right) =\frac{\sum_{i=1}^N{w_ic_i}}{\sum_{i=1}^N{w_i}},(38)$$
+
 其中$w_i$由$s$形函数的乘积给出，$s$形函数由
+
 $$w_i = \varPhi(\frac{D_i}{tr}) · \varPhi(-\frac{D_i}{tr})	,(39)$$
+
 &emsp;&emsp;其中tr是截断距离，它截断了距离单个曲面太远的任何SDF值。为了考虑可能的多个射线表面相交，随后的截断区域加权为零，并且对像素颜色没有贡献。作者还使用nerf-w [65] 中的每帧外观潜在代码来解释白平衡和曝光变化。作者通过在截断的SDF MLP上使用行进立方体 [150] 重建了场景的三角形网格，并在ScanNet[28] 和私有合成数据集上获得了干净的重建结果 (但由于未提供DTU结果，因此无法直接与UNISERF和NeuS进行比较)。
 
 # 总结与展望
