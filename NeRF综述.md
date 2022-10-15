@@ -28,34 +28,20 @@ $$F\left( x,\theta ,\varphi \right) →\left( c,\sigma \right) ,(1)$$
 - 使用体绘制从这些颜色和密度产生图像 (参见图1中的 (c))。
 
 &emsp;&emsp;更详细地说，给定体积密度和颜色函数，使用体积渲染来获得任何相机射线$r(t) = o+td$的颜色$C(r)$，相机位置$o$和观看方向$d$使用
-$$
-C(r)=\int_{t_1}^{t_2}{T(t)·\sigma(r(t))·c(r(t),d)·dt},(2)
-$$
+$$C(r)=\int_{t_1}^{t_2}{T(t)·\sigma(r(t))·c(r(t),d)·dt},(2)$$
 &emsp;&emsp;其中$T(t)$ 是累积透射率，表示光线从$t_1$传播到$t$而不被拦截的概率，由
-$$
-T(t)=e^{-\int_{t}^{t_1}{\sigma (r(u))·du}},(3)
-$$
+$$T(t)=e^{-\int_{t}^{t_1}{\sigma (r(u))·du}},(3)$$
 &emsp;&emsp;$C(r)$通过待合成图像的每个像素。这个积分可以用数值计算。最初的实现 [1] 和大多数后续方法使用了非确定性分层抽样方法，将射线分成$N$个等间距的仓，并从每个仓中均匀抽取一个样本。然后，等式 (2) 可以近似为
-$$
-\hat{C}\left( r \right) =\sum_{i=1}^N{\alpha _iT_ic_i}\,,\,where\quad T_i=e^{-\sum_{j=1}^{i-1}{\sigma _j\delta _j}},(4)
-$$
+$$\hat{C}\left( r \right) =\sum_{i=1}^N{\alpha _iT_ic_i}\,,\,where\quad T_i=e^{-\sum_{j=1}^{i-1}{\sigma _j\delta _j}},(4)$$
 &emsp;&emsp;$\delta _i$是从样本$i$到样本$i+1$的距离。$(\sigma_i,c_i)$是根据NeRF MLP(s) 计算的在给定射线的采样点$i$上评估的密度和颜色。$α_i$在采样点$i$处合成$alpha$的透明度/不透明度由
-$$
-\alpha_i = 1-e^{\sigma_i\delta_i},(5)
-$$
+$$\alpha_i = 1-e^{\sigma_i\delta_i},(5)$$
 &emsp;&emsp;可以使用累积的透射率计算射线的预期深度为
-$$
-d(r)=\int_{t_1}^{t_2}{T(t)·\sigma(r(t))·t·dt},(6)
-$$
+$$d(r)=\int_{t_1}^{t_2}{T(t)·\sigma(r(t))·t·dt},(6)$$
 &emsp;&emsp;这可以近似于方程 (4) 近似方程 (2) 和 (3)
-$$
-\hat{D}(r) = \sum_{i=1}^{N}{\alpha_it_iT_i},(7)
-$$
+$$\hat{D}(r) = \sum_{i=1}^{N}{\alpha_it_iT_i},(7)$$
 &emsp;&emsp;某些深度正则化方法使用预期的深度来将密度限制为场景表面的类似delta的函数，或增强深度平滑度。
 &emsp;&emsp;对于每个像素，使用平方误差光度损失来优化MLP参数。在整个图像上，这是由
-$$
-L = \sum_{r\in R}{|| \hat{C}(r)-C_{gt}(r)||_2^2},(8)
-$$
+$$L = \sum_{r\in R}{|| \hat{C}(r)-C_{gt}(r)||_2^2},(8)$$
 &emsp;&emsp;其中，$C_{gt}(r)$ 是与$r$相关联的训练图像的像素的地面真实颜色,$R$是与待合成图像相关联的射线批次。
 
 ## 数据集
@@ -71,31 +57,19 @@ $$
 &emsp;&emsp;在标准设置中，通过NeRF进行新颖的视图综合使用基准的视觉质量评估指标。这些指标试图评估具有 (完全参考) 或不具有 (无参考) 地面真实图像的单个图像的质量。峰值信噪比 (PSNR)，结构相似性指数度量 (SSIM) [31]，学习的感知图像补丁相似性 (LPIPS) [32] 是迄今为止NeRF文献中最常用的。
 ### PSNR
 &emsp;&emsp;PSNR是一种无参考质量评估指标：
-$$
-PSNR(I)=10·log_{10}{\frac{MAX(I)^2}{MSE(I)}},(10)
-$$
+$$PSNR(I)=10·log_{10}{\frac{MAX(I)^2}{MSE(I)}},(10)$$
 &emsp;&emsp;其中$MAX(I)$ 是图像中的最大可能像素值 (对于8位整数255)，并且$MSE(I)$ 是在所有颜色通道上计算的像素方向均方误差。$PNSR$也通常用于信号处理的其他领域，并且被很好地理解。
 ## SSIM
 &emsp;&emsp;SSIM是一个完整的参考质量评估指标,对于单个小块
-$$
-SSIM(x,y) = \frac{(2\mu_x\mu_y+C_1)(2\sigma_{xy}+C_2)}{(\mu_x^2+\mu_y^2+C_1)(\mu_x^2+\mu_y^2+C_2)},(11)
-$$
+$$SSIM(x,y) = \frac{(2\mu_x\mu_y+C_1)(2\sigma_{xy}+C_2)}{(\mu_x^2+\mu_y^2+C_1)(\mu_x^2+\mu_y^2+C_2)},(11)$$
 &emsp;&emsp;其中$C_i = (K_iL)^2$，L是像素的动态范围 (对于8bit整数255)，并且$K_1 = 0.01$，$K_2 = 0.03$是由原始作者选择的常数。我们注意到，在原始论文 [31] 中，有 (12) 给出的$SSIM$的更一般形式。在11 × 11圆形对称高斯加权窗口内计算局部统计量$\mu^,s$, $\sigma^,s$，权重$w_i$的标准差为1.5，并归一化为1。这些是由给出的，没有损失概括
-$$
-\mu_x = \sum_i{w_ix_i},(12)
-$$
-$$
-\sigma_x=(\sum_iw_i(x_i-\mu_x)^2)^{\frac{1}{2}},(13)
-$$
-$$
-\sigma_{xy}=\sum_iw_i(x_i-\mu_x)(y_i-\mu_y),(14)
-$$
+$$\mu_x = \sum_i{w_ix_i},(12)$$
+$$\sigma_x=(\sum_iw_i(x_i-\mu_x)^2)^{\frac{1}{2}},(13)$$
+$$\sigma_{xy}=\sum_iw_i(x_i-\mu_x)(y_i-\mu_y),(14)$$
 &emsp;&emsp;其中$x_i$，$y_i$分别是从参考图像和评估图像中采样的像素。在实践中，对整个图像的$SSIM$分数进行平均。
 ## LPIPS
 &emsp;&emsp;$LPIPS$是使用学习的卷积特征的完整参考质量评估指标。得分由多层特征图的加权像素$MSE$给出。
-$$
-LPIPS(x,y)=\sum_l^L\frac{1}{H_lW_l}\sum_{h,w}^{H_l,W_l}{||w_l\odot x_{hw}^{l}-y_{hw}^{l}||}_2^2,(15)
-$$
+$$LPIPS(x,y)=\sum_l^L\frac{1}{H_lW_l}\sum_{h,w}^{H_l,W_l}{||w_l\odot x_{hw}^{l}-y_{hw}^{l}||}_2^2,(15)$$
 &emsp;&emsp;$x_{hw}^{l}$和$y_{hw}^{l}$是参考和评估图像在像素宽度w，像素高度h和层l处的特征。Hl和Wl是相应层处的特征图高度和宽度。最初的$LPIPS$论文使用SqueezeNet [444]，VGG [34] 和AlexNet [35] 作为特征提取主干。原始纸张使用了五层。原始作者提供了微调和从头开始的配置，但实际上，已按原样使用预先训练的网络。
 # 基于方法分类的NeRF变体
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/813f26f935174975a60bade2bcd0a7c8.png)
@@ -124,12 +98,8 @@ $$
 
 &emsp;&emsp;城市辐射场旨在应用基于NeRF的视图合成和基于激光雷达数据的稀疏多视图图像对城市环境进行3D重建。除了标准的光度损失外，他们还使用基于激光雷达的深度损失$L_{depth}$和视线损失$L_{sight}$，以及基于skybox的分割损失Lseg。这些是由
 $$L_{depth} = E[(z − \hat{z}^2)], (30)$$
-$$
-L_{sight}=E\left[ \int_{_{t_1}}^{t_2}{\left( w\left( t \right) −\delta \left( z \right) \right)^2dt} \right] ,(31)
-$$
-$$
-L_{seg}=E\left[ S_i\left(r\int_{_{t_1}}^{t_2}{\left( w\left( t \right) −\delta \left( z \right) \right)^2dt} \right)\right] ,(32)
-$$
+$$L_{sight}=E\left[ \int_{_{t_1}}^{t_2}{\left( w\left( t \right) −\delta \left( z \right) \right)^2dt} \right] ,(31)$$
+$$L_{seg}=E\left[ S_i\left(r\int_{_{t_1}}^{t_2}{\left( w\left( t \right) −\delta \left( z \right) \right)^2dt} \right)\right] ,(32)$$
 
 &emsp;&emsp;$w(t)$ 定义为公式 (3) 中定义的$T(t)σ(t)$。$z$和 $ζ$ 分别是激光雷达测量深度和估计深度 (6)。$Δ (z)$ 是狄拉克 $δ$函数。如果光线穿过第i图像中的天空像素，则$S_i(r) = 1$，其中天空像素通过预训练模型 [145] 被分割，否则为0。深度损失迫使估计的深度 “$z$” 与激光雷达获取的深度匹配。视线损失迫使辐射集中在测量深度的表面。分割损失迫使沿着光线穿过天空像素的点样本具有零密度。通过在体积渲染过程中从NeRF模型中提取点云来执行3D重建。为虚拟相机中的每个像素投射射线。然后，使用估计的深度将点云放置在3D场景中。泊松表面重建用于从此生成的点云构建3D网格。
 #### Mega-NeRF
@@ -151,12 +121,8 @@ $$
  - Animatable NeRF:[https://zju3dv.github.io/animatable_nerf/](https://zju3dv.github.io/animatable_nerf/)*代码已开源*
 
 &emsp;&emsp;人体神经体应用NeRF体绘制来渲染视频中移动姿势的人类。作者首先使用输入视频来锚定基于顶点的可变形人体模型 ($SMPL$[146])。在每个顶点上，作者附加了一个16维潜码$Z$。然后使用人体姿势参数$S$ (最初是在训练过程中从视频中估计的，可以在推理过程中输入) 来变形人体模型。该模型在网格中进行体素化，然后由3D CNN处理，该3D CNN在每个占用的体素处提取128维潜码 (特征)。对于任何3D点$x$，首先将其转换为$SMPL$坐标系，然后通过插值提取128维潜码/特征 $ψ$。这被传递给alpha MLP。RGB MLP还采用了3D坐标 $γ_x(x)$的位置编码和查看方向$γ_d(d)$和外观潜码$l_t$(考虑视频中的每帧差异)。
-$$
-\sigma \left( x \right) =M_\sigma \left( \varphi \left( x|Z，S \right) \right) ,(33)
-$$
-$$
-c \left( x \right) =M_\sigma \left( \varphi \left( x|Z，S \right)  ,γ_x(x),γ_d(d),lt\right),(34)
-$$
+$$\sigma \left( x \right) =M_\sigma \left( \varphi \left( x|Z，S \right) \right) ,(33)$$
+$$c \left( x \right) =M_\sigma \left( \varphi \left( x|Z，S \right)  ,γ_x(x),γ_d(d),lt\right),(34)$$
 
 &emsp;&emsp;标准的NeRF方法与运动物体作斗争，而神经体的网格变形方法能够在框架之间和姿势之间进行插值。来自2021/2022顶级会议的最先进模型，如动画NeRF [144] (2021年5月) 、DoubleField [143] (2021年6月) 、HumanNeRF [141] (2022年1月) 、郑等人 [142] (2022年3月) 也在这一主题上进行了创新。
 
@@ -178,18 +144,14 @@ $$
  
  #### RawNeRF
 &emsp;&emsp;Mildenhall等人创建了RawNeRF [38] (2021年11月)，使Mip-NeRF [36] 适应高动态范围 (HDR) 图像视图合成和去噪。RawNeRF使用原始线性图像作为训练数据在线性颜色空间中渲染。这允许改变曝光和色调映射曲线，本质上是在NeRF渲染后应用后处理，而不是直接使用后处理图像作为训练数据。使用相对MSE损耗对噪声2噪声的HDR路径跟踪进行训练 [147]，由
-$$
-L=\sum_{i=1}^N{\left( \frac{\hat{y}_i-y_i}{sg\left( \hat{y}_i \right) +\epsilon} \right)^2},(35)
-$$
+$$L=\sum_{i=1}^N{\left( \frac{\hat{y}_i-y_i}{sg\left( \hat{y}_i \right) +\epsilon} \right)^2},(35)$$
 &emsp;&emsp;其中sg(.) 表示梯度停止 (将其参数视为具有零梯度的常数)。RawNeRF由可变曝光图像监督，NeRF模型的 “曝光” 由训练图像的快门速度以及每通道学习的缩放因子缩放。它在夜间和弱光场景渲染和去噪方面取得了令人印象深刻的效果。RawNeRF特别适合光线不足的场景。关于基于NeRF的去噪，NaN [135] (4月10日) 也探索了这一新兴的研究领域。
 #### HDR-NeRF
 &emsp;&emsp;与RawNeRF同时，Xin等人的HDR-NeRF [133] (2021年11月) 也致力于HDR视图合成。但是，与RawNeRF中的原始线性图像相反，HDR-NeRF通过使用具有可变曝光时间的低动态范围训练图像来进行HDR视图合成。RawNeRF建模了HDR辐射e(r) ∈ [0，∞) 取代了 (1) 中的标准c(r)。使用三个MLP摄像机响应函数 (每个颜色通道一个) f，该辐射被映射到彩色c。这些代表了典型的摄像机制造商依赖的线性和非线性后处理。HDR-NeRF的性能大大优于基线NeRF和nerf-w [65] 在低动态范围 (LDR) 重建中，并在HDR重建方面获得了较高的视觉评估得分。
 
 #### Semantic-NeRF
 &emsp;&emsp;Semantic-NeRF [70] (2021年3月) 是一个能够合成新颖视图的语义标签的NeRF模型。这是使用附加的与方向无关的MLP (分支) 完成的，该MLP将位置和密度MLP特征作为输入，并生成逐点语义标签$s$。语义标签也是通过体绘制生成的。
-$$
-S(r) = \sum _i^N{T_i\alpha_is_i},(36)
-$$
+$$S(r) = \sum _i^N{T_i\alpha_is_i},(36)$$
 &emsp;&emsp;语义标签通过分类交叉熵损失进行监督。该方法能够利用稀疏语义标签 (10% 标记) 训练数据进行训练，以及从像素噪声和区域/实例噪声中恢复语义标签。该方法还获得了良好的标签超分辨率结果，并且标签传播 (来自稀疏点逐点注释)，并且可以用于多视图语义融合，优于非深度学习方法。NeSF [132] (2021年11月)。Fig-NeRF [68] 也解决了这个问题。
 
 ### Surface Reconstruction
@@ -205,19 +167,13 @@ $$
 Signed distance functions(SDF) 给出3D点到它们定义的表面的有符号距离 (即，如果在对象内部，则为负距离，如果在外部，则为正距离)。它们通常用于计算机图形学中，以定义曲面，这些曲面是函数的零集。SDF可通过根查找用于表面重建，并可用于定义整个场景几何形状。
 #### Neural Surface
 &emsp;&emsp;神经表面 (NeuS) [136] (2021年6月) 模型像基线NeRF模型一样执行体积渲染。但是，它使用带符号距离函数来定义场景几何形状。它将MLP的密度输出部分替换为输出有符号距离函数值的MLP。然后将在体绘制方程 (2) 中替换 $σ(t)$的密度 $ρ(t)$ 构造为
-$$
-\rho \left( t \right) =max\left( \frac{\frac{−d\varPhi}{dt}\left( f\left( r\left( t \right) \right) \right)}{ \varPhi \left( f\left( r\left( t \right) \right) \right)} ,0 \right) ,(37)
-$$
+$$\rho \left( t \right) =max\left( \frac{\frac{−d\varPhi}{dt}\left( f\left( r\left( t \right) \right) \right)}{ \varPhi \left( f\left( r\left( t \right) \right) \right)} ,0 \right) ,(37)$$
 &emsp;&emsp;其中 $\varPhi(·)$是$s$形函数，其导数$\frac{d\varPhi}{dt}$是logistic密度分布。作者已经证明了他们的模型优于基线NeRF，并为他们的方法和基于SDF的场景密度的实现提供了理论和实验依据。此方法与UNISERF并发，并且在DTU数据集上优于它 [26]。与UNISURF一样，可以使用在SDF上执行根查找来定义场景的显式表面几何形状。
 #### Others
 &emsp;&emsp;Azinovic等人的同时工作[137] (2021年4月) 也用截断的SDF MLP代替了密度MLP。相反，他们将像素颜色计算为采样颜色的加权总和
-$$
-C\left( r \right) =\frac{\sum_{i=1}^N{w_ic_i}}{\sum_{i=1}^N{w_i}},(38)
-$$
+$$C\left( r \right) =\frac{\sum_{i=1}^N{w_ic_i}}{\sum_{i=1}^N{w_i}},(38)$$
 其中$w_i$由$s$形函数的乘积给出，$s$形函数由
-$$
-w_i = \varPhi(\frac{D_i}{tr}) · \varPhi(-\frac{D_i}{tr})	,(39)
-$$
+$$w_i = \varPhi(\frac{D_i}{tr}) · \varPhi(-\frac{D_i}{tr})	,(39)$$
 &emsp;&emsp;其中tr是截断距离，它截断了距离单个曲面太远的任何SDF值。为了考虑可能的多个射线表面相交，随后的截断区域加权为零，并且对像素颜色没有贡献。作者还使用nerf-w [65] 中的每帧外观潜在代码来解释白平衡和曝光变化。作者通过在截断的SDF MLP上使用行进立方体 [150] 重建了场景的三角形网格，并在ScanNet[28] 和私有合成数据集上获得了干净的重建结果 (但由于未提供DTU结果，因此无法直接与UNISERF和NeuS进行比较)。
 
 # 总结与展望
