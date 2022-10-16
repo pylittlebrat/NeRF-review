@@ -92,12 +92,152 @@ $$LPIPS(x,y)=\sum_l^L\frac{1}{H_lW_l}\sum_{h,w}^{H_l,W_l}{||w_l\odot x_{hw}^{l}-
 > 在synthetic NeRF dataset上各个NeRF模型的性能比较
 
 ## 基本原理
+![在这里插入图片描述](https://img-blog.csdnimg.cn/003b7ae84aaa4b6d9703d580e11b355d.png)
+- mip-NeRF(2021):[https://jonbarron.info/mipnerf/](https://jonbarron.info/mipnerf/)*代码已开源*
+- mip-NeRF 360 (2022):[https://jonbarron.info/mipnerf360/](https://jonbarron.info/mipnerf360/)*代码已开源*
+- Ref-NeRF(2021):[https://dorverbin.github.io/refnerf/](https://dorverbin.github.io/refnerf/)*代码已开源*
+- RawNeRF(2021):[https://bmild.github.io/rawnerf/](https://bmild.github.io/rawnerf/)*代码已开源*
+- Nerfies (2020):[https://nerfies.github.io/](https://nerfies.github.io/)*代码已开源*
+- HyperNeRF(2021):[https://hypernerf.github.io/](https://hypernerf.github.io/)*代码已开源*
+- CodeNeRF (2021):[https://sites.google.com/view/wbjang/home/codenerf](https://sites.google.com/view/wbjang/home/codenerf)*代码已开源*
+- DS-NeRF (2021):[https://www.cs.cmu.edu/~dsnerf/](https://www.cs.cmu.edu/~dsnerf/)*代码已开源*
+- NerfingMVS (2021):[https://weiyithu.github.io/NerfingMVS/](https://weiyithu.github.io/NerfingMVS/)*代码已开源*
+- Urban Radiance Field (2021):[https://urban-radiance-fields.github.io/](https://urban-radiance-fields.github.io/)
+- PointNeRF (2022):[https://xharlie.github.io/projects/project_sites/pointnerf/](https://xharlie.github.io/projects/project_sites/pointnerf/)*代码已开源*
+
 ## 改进训练和推理渲染速度
+![在这里插入图片描述](https://img-blog.csdnimg.cn/4478c168885f46f6af7150523d79c202.png)
+- NSVF (2020)：[https://lingjie0206.github.io/papers/NSVF/](https://lingjie0206.github.io/papers/NSVF/)*代码已开源*
+- AutoInt (2020)：[https://github.com/shichence/AutoInt](https://github.com/shichence/AutoInt)*代码已开源*
+- Instant-NGP (2022)：[https://nvlabs.github.io/instant-ngp/](https://nvlabs.github.io/instant-ngp/)*代码已开源*
+- SNeRG (2020)：[https://phog.github.io/snerg/](https://phog.github.io/snerg/)*代码已开源*
+- Plenoctree (2021)：[https://alexyu.net/plenoctrees/](https://alexyu.net/plenoctrees/)*代码已开源*
+- FastNeRF (2021)：[https://microsoft.github.io/FastNeRF/](https://microsoft.github.io/FastNeRF/)
+(code:[https://github.com/houchenst/FastNeRF](https://github.com/houchenst/FastNeRF)?)
+- KiloNeRF (2021)：[https://github.com/creiser/kilonerf](https://github.com/creiser/kilonerf)*代码已开源*
+- Plenoxels (2021)：[https://alexyu.net/plenoxels/](https://alexyu.net/plenoxels/)*代码已开源*
+- DVGO (2021)：[https://sunset1995.github.io/dvgo/](https://sunset1995.github.io/dvgo/)*代码已开源*
+- TensorRF (2021)：[https://github.com/NVIDIA/TensorRT](https://github.com/NVIDIA/TensorRT)*代码已开源*
+
+&emsp;&emsp;Mildenhall等人 [1] 基于原NeRF实现中，为了提高计算效率，使用了分层渲染。在数值积分 (2) 期间，天真的渲染将需要密集地评估沿每个相机射线的所有查询点处的mlp。在他们提出的方法中，他们使用两个网络来表示场景，一个粗略，一个精细。粗网络的输出用于为精细网络选择采样点，从而防止了精细规模的密集采样。在随后的作品中，大多数提高NeRF训练和推理速度的尝试可以大致分为以下两类。
+- 第一类将NeRF MLP评估结果训练，预计算并存储到更易于访问的数据结构中。这只会提高推理速度，尽管有很大的因素。我们将这些模型称为baked models；
+- 第二类是non-baked models。其中包括多种类型的创新。这些模型通常 (但并非总是) 尝试从学习的mlp的参数中学习单独的场景特征，这反过来又允许较小的mlp (例如，在体素网格中学习和存储特征，然后将其馈送到产生颜色和密度的mlp中)，这可以以内存为代价提高训练和推理速度；
+
+&emsp;&emsp;其他技术，例如射线终止 (当累积的透射率接近零时防止进一步的采样点)，空白空间跳过和/或分层采样 (原始NeRF论文中使用的粗细mlp)。这些也经常用于进一步提高训练和推理速度。
+
+### NSVF
+&emsp;&emsp;在神经稀疏体素场 (NSVF) (2020年7月) 中，Liu等人。[46] 开发了基于体素的NERF模型，该模型将场景建模为以体素为边界的一组辐射场。通过插值存储在体素顶点的可学习特征来获得特征表示，然后由计算$\sigma$和$c$的共享MLP处理。NSVF对射线使用基于稀疏体素相交的点采样，这比密集采样要有效得多，或Mildenhall等人的分层两步法 [1]。但是，由于将特征向量存储在潜在密集的体素网格上，因此该方法的内存密集型更高。
+
+### AutoInt
+&emsp;&emsp;AutoInt (2020年12月) [47] 近似于体积渲染步骤。通过分段分离离散体绘制方程4，然后使用它们新开发的AutoInt，该AutoInt通过训练其梯度 (grad) 网络$\psi_\theta^i$ 来训练MLP $\varPhi_\theta$ ，该网络与内部参数共享，并用于重组积分网络$\varPhi_\theta$ 。这允许渲染步骤使用更少的样本，从而导致比基线NeRF加速十倍的速度略有质量下降。
+### DIVeR
+&emsp;&emsp;用于体绘制的确定性集成 (DIVeR) [93] (2021年11月) 从NSVF [46] 中汲取了灵感，还在执行稀疏正则化和体素剔除的同时，共同优化了特征体素网格和解码器MLP。但是，他们使用与NeRF方法不同的技术在体积渲染上进行了创新。DIVeR在体素网格上执行了确定性射线采样，该网格为每个射线间隔 (由射线与特定体素的交点定义) 产生了一个集成特征，该特征由MLP解码以产生射线间隔的密度和颜色。这基本上颠倒了体积采样和MLP评估之间的通常顺序。该方法在NeRF合成 [1]，BlendedMVS [94] 以及Tanks和Temple数据集 [95] 上进行了评估，在质量方面优于PlenOctrees [50]，FastNeRF [51] 和KiloNeRF [52] 等方法，具有相当的渲染速度。
+
+### Instant-NGP
+&emsp;&emsp;Muller等人最近的一项创新，被称为InstantNeural Graphics原语 (Instant-NGP) [48] (2022年1月)，极大地提高了NERF模型训练和推理速度。作者提出了一种学习的参数多分辨率哈希编码，该编码与NERF模型MLPs同时训练。他们还采用了先进的射线行进技术，包括指数步进，空白空间跳过，样本压缩。MLP的这种新的位置编码和相关的优化实现大大提高了训练和推理速度，以及所得NERF模型的场景重建精度。在训练的几秒钟内，他们取得了与以前NERF模型中数小时训练相似的结果。
+### SNeRG
+&emsp;&emsp;Yu等人的并行SNeRG，plenotree [50] (3月2021日) 方法。实现了比原始实现快3000倍的推理时间。作者训练了a spherical harmonic NeRF (nerf-sh)，它不是预测颜色函数，而是预测其spherical harmonic 系数。作者建立了预先计算的颜色MLP的spherical harmonic coefﬁcients的八叉树。在八叉树的建造过程中，首先对场景进行了体素化，消除了低透射率体素。通过对NeRF的球谐分量进行蒙特卡洛估计，此过程也可以应用于标准NeRF (non nerf-sh模型)。可以使用初始训练图像进一步优化plenotrees。相对于NeRF训练，这种微调程序是快速的。
+### FastNeRF
+&emsp;&emsp;在FastNeRF [51] (3月2021日) 中，Garbin等人将颜色函数c分解为与方向位置相关的MLP的输出 (也产生密度 σ) 和与方向相关的MLP的输出的内积。这使Fast-NeRF可以轻松地在场景的密集网格中缓存颜色和密度评估，从而大大提高了推理时间的3000倍。它们还包括硬件加速光线跟踪 [96]，它跳过了空白空间，并在光线透射率饱和时停止。
+
+### KiloNeRF
+&emsp;&emsp;Reiser等人 [52] (2021年5月) 通过引入KiloNeRF在基线NeRF上进行了改进，该方法将场景分离为数千个单元格，并训练了独立的mlp以对每个单元格进行颜色和密度预测。这数千个小型MLP是使用来自大型训练有素的老师MLP的知识蒸馏进行培训的，我们发现这与 “烘焙” 密切相关。他们还采用了早期射线终止和空白跳过。仅这两种方法就将基线NeRF的渲染时间提高了71倍。将基线NeRF的MLP分成数千个较小的MLP，进一步将渲染时间提高了36倍，从而使渲染时间加快了2000倍。
+
+
 ## 少量拍摄/稀疏训练视图NeRF
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3ef6c10f5a46481e8e043d4203f9cef2.png)
+- MVSNeRF (2021):[https://apchenstu.github.io/mvsnerf/](https://apchenstu.github.io/mvsnerf/)*代码已开源*
+- NeuRay (2021):[https://liuyuan-pal.github.io/NeuRay/](https://liuyuan-pal.github.io/NeuRay/)*代码已开源*
+- PixelNeRF (2020):[https://alexyu.net/pixelnerf/](https://alexyu.net/pixelnerf/)*代码已开源*
+- DietNeRF (2021):[https://ajayj.com/dietnerf](https://ajayj.com/dietnerf)*代码已开源*
+- DS-NeRF (2021):[https://www.cs.cmu.edu/~dsnerf/](https://www.cs.cmu.edu/~dsnerf/)*代码已开源*
+
+&emsp;&emsp;基线NeRF需要许多具有每个场景已知相机姿势的多视图图像; 每个场景都是独立训练的。基线NeRF的常见失败情况是训练视图变化不够，训练样本不足，或者样本的姿势变化不够。这会导致对单个视图的过度拟合以及不明智的场景几何形状。然而，一系列NeRF方法利用预先训练的图像特征提取网络，通常是预先训练的卷积神经网络 (CNN)，如 [35][100]，大大降低了成功训练NeRF所需的训练样本数量。一些作者称此过程为 “图像特征条件”。与基线NeRF模型相比，这些模型通常具有较低的训练时间。
+### pixelNeRF
+&emsp;&emsp;在pixelNeRF [58] (2020年12月) 中，Yu等人。使用卷积神经网络 (和双线性插值) 的预训练层来提取图像特征。然后将NeRF中使用的相机射线投影到图像平面上，并为每个查询点提取图像特征。然后将特征，视图方向和查询点传递到NeRF网络上，从而产生密度和颜色。Trevitick等人的一般辐射场 (GRF) [101] (2020年10月) 采取了类似的方法，主要区别在于GRF在规范空间中操作，而不是pixelNeRF的视图空间。
+
+### MVSNeRF
+&emsp;&emsp;MVSNeRF [56] (3月2021日) 使用了一种略有不同的方法。他们还使用预先训练的CNN提取了2D图像特征。然后使用平面扫描和基于方差的成本将这些2D特征映射到3D体素化成本体积。预先训练的3D CNN用于提取3D神经编码体积，该体积用于使用插值生成每个点的潜在代码。当为体绘制执行点采样时，NeRF MLP然后使用这些潜在特征，点坐标和观看方向作为输入来生成点密度和颜色。训练过程涉及3D特征卷和NeRF MLP的联合优化。在DTU数据集上进行评估时，在训练的15分钟内，MVSNeRF可以达到与基线NeRF训练数小时相似的结果。
+
+### DietNeRF
+&emsp;&emsp;DietNeRF [59] (2021年6月) 除了标准光度损失外，还基于从Clip-ViT [102] 提取的图像特征引入了语义一致性损失$L_{sc}$。
+
+ $$
+ L_{sc} = \frac{\lambda}{2}|| \phi(I)-\phi(\hat{I})||_2^2,(21)
+ $$
+&emsp;&emsp; 其中$\phi$对训练图像I和渲染图像I进行Clip-ViT特征提取。这简化为归一化特征向量的余弦相似性损失 ([59] 中的公式5)。DietNeRF以子采样的NeRF合成数据集 [1] 和DTU数据集 [26] 为基准。单视图新颖合成的最佳性能方法是使用DietNeRF的语义一致性损失进行微调的pixelNeRF [58] 模型。
+
+### NeuRay
+&emsp;&emsp;Liu等人 [57] (2021年7月) 的神经射线 (Neural Rays，Neural Rays) 方法也采用了成本量方法。从所有输入视图中，作者使用多视图立体算法估算了成本量 (或深度图)。根据这些，CNN用于创建特征图G。在体绘制过程中，从这些特征中提取可见性和局部特征，并使用MLPs进行处理以提取颜色和alpha。可见性计算为累积密度函数，写为加权和sigmoid函数 $\phi$
+ $$
+v(z) = 1 − t(z)，where \;t(z) = \sum_{i=1}^N{w_i\varPhi(\frac{(z-\mu_i)}{\sigma_i})}(22)
+ $$
+&emsp;&emsp;其中$w_i，\mu_i，\sigma_ i$使用MLP从G解码。NeuRay还使用了基于alpha的采样策略，通过计算命中概率，并且仅在具有高命中概率的点周围进行采样 (有关详细信息，请参见 [57] 中的第3.6节)。与其他以从预先训练的神经网络提取的图像特征为条件的NeRF模型一样，NeuRay很好地推广到新场景，并且可以进一步微调以超过基线NeRF模型的10个性能。在对两个模型进行微调30分钟后，NeuRay在NeRF合成数据集上的表现优于MVSNeRF。
+### GeoNeRF
+&emsp;&emsp;GeoNeRF[103] (2021年11月) 使用预先训练的特征金字塔网络从每个视图中提取2D图像特征。然后，此方法使用平面扫描构建了级联3D成本量。从这两个特征表示中，对于沿射线的N个查询点中的每个，提取了一个视图独立和多个视图依赖的特征标记。这些是使用变压器进行改进的 [104]。然后，通过自动编码器细化与N个视图无关的标记，该自动编码器沿射线返回N个密度。N组与视图相关的令牌分别输入到提取颜色的MLP中。如作者所示，这些网络都可以经过预先训练并很好地推广到新场景。此外，它们可以对每个场景进行微调，在DTU [26]，NeRF合成 [1] 和LLF前向 [5] 数据集上取得很好的效果，优于pixelNeRF [58] 和MVSNeRF [56] 等方法。
 ## (潜在) 条件NeRF
+![在这里插入图片描述](https://img-blog.csdnimg.cn/ff40ac1b5d09473db5a66438f7b829b7.png)
+- GIRAFFE (2020):[https://m-niemeyer.github.io/project-pages/giraffe/index.html](https://m-niemeyer.github.io/project-pages/giraffe/index.html)*代码已开源*
+- GRAF (2020):[https://autonomousvision.github.io/graf/](https://autonomousvision.github.io/graf/)*代码已开源*
+- $\pi$-GAN (2020):[https://marcoamonteiro.github.io/pi-GAN-website/](https://marcoamonteiro.github.io/pi-GAN-website/)*代码已开源*
+- GNeRF (2021):[https://github.com/quan-meng/gnerf](https://github.com/quan-meng/gnerf)*代码已开源*
+- NeRF-VAE (2021):[https://arxiv.org/abs/2104.00587](https://arxiv.org/abs/2104.00587)
+- NeRF-W (2020):[https://nerf-w.github.io/](https://nerf-w.github.io/)(非官方实现代码:[https://github.com/kwea123/nerf_pl](https://github.com/kwea123/nerf_pl))
+- Edit-NeRF (2021):[http://editnerf.csail.mit.edu/](http://editnerf.csail.mit.edu/)*代码已开源*
+- CLIP-NeRF (2021):[https://arxiv.org/abs/2112.05139](https://arxiv.org/abs/2112.05139)
+
+&emsp;&emsp;NeRF模型的潜在条件是指使用潜在向量 (又名潜在代码) 来控制NeRF视图合成的各个方面。这些潜在向量可以在管道的各个点处输入，以控制场景的组成，形状和外观。它们允许添加一组参数来控制改变图像到图像的场景方面，同时允许其他部分考虑场景的永久方面，例如场景几何形状。训练以潜码为条件的图像生成器的一种相当简单的方法是使用变分自动编码器 (VAE) [112] 方法。这些模型使用编码器和解码器，编码器按照用户定义的特定概率分布将图像转换为潜码，解码器将采样的潜码转换回图像。与以下两种方法相比，这些方法在NeRF模型中使用的频率不高，因此，我们不为VAE引入单独的小节。
 ## 解绑场景与场景构图
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c504e4663c454e2f93c09704adc0f0af.png)
+- NeRF-W (2020):[https://nerf-w.github.io/](https://nerf-w.github.io/)(非官方实现代码:[https://github.com/kwea123/nerf_pl](https://github.com/kwea123/nerf_pl))
+- NeRF++ (2020):[https://github.com/Kai-46/nerfplusplus](https://github.com/Kai-46/nerfplusplus)*代码已开源*
+- GIRAFFE (2020):[https://m-niemeyer.github.io/project-pages/giraffe/index.html](https://m-niemeyer.github.io/project-pages/giraffe/index.html)*代码已开源*
+- Fig-NeRF (2021):[https://fig-nerf.github.io/](https://fig-nerf.github.io/)
+- Object-NeRF (2021):[https://zju3dv.github.io/object_nerf/](https://zju3dv.github.io/object_nerf/)
+Semantic-NeRF (2021):[https://shuaifengzhi.com/Semantic-NeRF/](https://shuaifengzhi.com/Semantic-NeRF/)*代码已开源*
+
+&emsp;&emsp;尝试将NeRF模型应用于户外场景时，需要将前景和背景分开。这些室外场景还在照明和外观的图像图像变化方面提出了额外的挑战。本节介绍的模型使用各种方法解决了这个问题，许多模型通过逐个图像的外观代码来适应潜在条件。此研究领域中的某些模型还执行语义或实例分割，以查找3D语义标记中的应用。
+### NeRF-W
+&emsp;&emsp;在NeRF In the Wild (nerf-w) [65] (2020年8月) 中，Martin-Brualla等人解决了基线NeRF模型的两个关键问题。同一场景的真实照片可以包含由于照明条件而导致的每幅图像外观变化，以及在每幅图像中不同的瞬态对象。对于场景中的所有图像，密度MLP保持固定。但是，nerf-w将其颜色MLP取决于每个图像的外观嵌入。此外，另一个以每个图像瞬态嵌入为条件的MLP预测了瞬态对象的颜色和密度函数。这些潜在嵌入是使用生成潜在优化构建的。Nerf-w在渲染速度方面没有改善NeRF，但在拥挤的光旅游数据集上取得了更高的结果 [121]。
+### NeRF++
+&emsp;&emsp;Zhang等。开发了NeRF [67] (2020年10月) 模型，该模型通过使用球体分离场景而适应于生成未绑定场景的新颖视图。球体的内部包含所有前景对象和所有虚拟摄像机视图，而背景则位于球体之外。然后使用倒置的球体空间重新参数化球体的外部。训练了两个单独的NeRF模型，一个用于球体内部，另一个用于外部。相机射线积分也分为两部分进行了评估。使用这种方法，他们在坦克和太阳穴 [95] 场景以及来自yuger等人 [122] 的场景上的表现优于基线NeRF。
+### GIRAFFE
+&emsp;&emsp;GIRAFFE [60] (2020年11月) 也采用与nerf-w类似的方法构建，使用生成潜在代码并将背景和前景MLP分离以进行场景构图。GIRAFFE 是基于格拉夫的。它为场景中的每个对象分配了MLP，该MLP产生了标量密度和深层特征向量 (替换颜色)。这些mlp (具有共享的体系结构和权重) 作为输入形状和外观潜在向量以及输入姿势。背景被视为所有其他对象，除了它自己的MLP和权重。然后使用特征的密度加权和组成场景。然后使用体绘制从该3D体积特征字段创建一个小的2D特征图，该图被馈送到上采样CNN中以生成图像。GIRAFFE 使用此合成图像和2D CNN鉴别器进行了对抗性训练。生成的模型具有分散的潜在空间，可以对场景生成进行精细控制。
+### Fig-NeRF
+&emsp;&emsp;Fig-NeRF [68] (2021年4月) 也采用场景构图，但侧重于对象插值和偶数分割。使用两个单独的NeRF模型，一个用于前景，一个用于背景。他们的前景模型是可变形的Nerfies模型 [39]。他们的背景模型是外观潜码条件的NeRF。他们使用了两个光度损失，一个用于前景，一个用于背景。Fig-NeRF在诸如ShapeNet [30] Gelato [123] 和Objectron [124] 之类的数据集上获得了良好的结果。
 ## 姿态估计
+![在这里插入图片描述](https://img-blog.csdnimg.cn/ea47af15b8d346a6bdd1b3e3f4abda91.png)
+- iMAP (2021):[https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol](https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol)
+- NICE-SLAM (2021):[https://pengsongyou.github.io/nice-slam](https://pengsongyou.github.io/nice-slam)*代码已开源*
+- NeRF-- (2020):[https://nerfmm.active.vision/](https://nerfmm.active.vision/)*代码已开源*
+- BARF (2021):[https://chenhsuanlin.bitbucket.io/bundle-adjusting-NeRF/](https://chenhsuanlin.bitbucket.io/bundle-adjusting-NeRF/)*代码已开源*
+- SCNeRF (2021):[https://postech-cvlab.github.io/SCNeRF/](https://postech-cvlab.github.io/SCNeRF/)*代码已开源*
+
+
+&emsp;&emsp;NeRF模型需要输入图像和相机姿势来训练。在最初的2020论文中，未知的姿势被COLMAP库 [2] 获取，在没有提供相机姿势的情况下，该库也经常用于许多后续的NeRF模型中。通常，通过运动 (SfM) 问题将同时执行姿势估计和使用NeRF隐式场景表示的构建模型公式化为离线结构。在这些情况下，通常使用束调整 (BA) 来共同优化姿势和模型。但是，某些方法也将其表述为在线同时定位和映射 (SLAM) 问题。
+### iNeRF
+&emsp;&emsp;iNeRF [125] (2020年12月) 将姿势重建公式化为一个反问题。给定预先训练的NeRF，使用光度尺损失8，Yen-Chen等人。优化了姿势而不是网络参数。作者使用了兴趣点检测器，并进行了基于兴趣区域的采样。作者还进行了半监督实验，在该实验中，他们对未摆姿势训练图像使用iNeRF姿势估计来增强NeRF训练集，并进一步训练前向NeRF。作者表示，这种半监督将前向NeRF提出的照片的要求降低了25%。
+
+### NeRF--
+&emsp;&emsp;NeRF- [73] (2021年2月) 共同估计了NeRF模型参数和相机参数。这允许模型以端到端的方式构造辐射场并仅合成新颖的视图图像。NeRF-就两个视图合成而言，总体上获得了与使用COLMAP和2020 NeRF模型相当的结果。但是，由于姿势初始化的限制，NeRF-最适合前置场景，并且在旋转运动和对象跟踪运动方面苦苦挣扎。
+
+### BARF
+&emsp;&emsp;与NeRF-同时出现的是束调整的神经辐射场 (BARF) [74] (2021年4月)，它还与神经辐射场的训练一起共同估计了姿势。BARF还通过自适应掩蔽位置编码来使用从粗到细的配准，类似于Nerfies中使用的技术 [39]。总体而言，BARF结果超过了NeRF-在具有未知相机姿势的LLFF前向场景数据集上，1.49 PNSR在八个场景中的平均值，并超过了COLMAP注册基线NeRF的0.45 PNSR。为了简单起见，BARF和NeRF都使用了朴素的密集射线采样。
+### SCNeRF
+&emsp;&emsp;Jeong等人介绍了一种用于NeRF的自校准联合优化模型 (SCNeRF) [75] (2021年8月)。他们的相机校准模型不仅可以优化未知姿势，而且可以优化非线性相机模型 (例如鱼眼镜头模型) 的相机固有。通过使用课程学习，他们逐渐将非线性相机/噪声参数引入联合优化中。该相机优化模型也是模块化的，可以轻松地与不同的NeRF模型一起使用。该方法在LLFF场景 [5] 上优于BARF [74]。
+
+### IMAP
+&emsp;&emsp;Sucar等人推出了第一个基于NeRF的密集在线SLAM模型，名为iMAP [71] (3月2021日)。该模型利用持续的在线学习，以NeRF模型的形式共同优化了相机姿势和隐式场景表示。他们使用了迭代的两步方法跟踪 (相对于NeRF的姿势优化) 和映射 (姿势和NeRF模型参数的束调整联合优化)。iMAP通过与映射过程并行运行更快的跟踪步骤，实现了接近相机帧速率的姿势跟踪速度。iMAP还通过在稀疏和增量选择的一组图像上优化场景来使用关键帧选择。
+### GNeRF
+&emsp;&emsp;GNeRF是Meng等人 [63] (3月2021日) 的一种不同类型的方法，使用pose作为生成潜码。GNeRF首先通过对抗性训练获得粗略的相机姿势和辐射场。这是通过使用生成器来完成的，该生成器采用随机采样的姿势，并使用NeRF风格的rending合成视图。然后，鉴别器将渲染的视图与训练图像进行比较。然后，反转网络获取生成的图像，并输出一个姿势，将其与采样的姿势进行比较。这导致了粗略的图像姿势配对。然后在混合优化方案中通过光度损失共同完善图像和姿势。在合成NeRF数据集上，基于COLMAP的NeRF略优于GNeRF，在DTU数据集上优于基于COLMAP的NeRF。
+
+### NICE-SLAM
+&emsp;&emsp;在iMAP的基础上，NICE-SLAM [72] (2021年12月) 在关键帧选择和NeRF体系结构等各个方面进行了改进。具体来说，他们使用了场景几何形状的基于分层网格的表示，该表示能够在某些场景的大规模未观察到的场景特征 (墙壁，地板等) 中填补iMAP重建的空白。NICESLAM比iMAP实现了更低的姿态估计误差和更好的场景重建结果。NICE-SLAM也只使用iMAP的1/4触发器，1/3跟踪时间和1/2映射时间。
 ## 相邻方法
+### Plenoxel
+&emsp;&emsp;Plenoxel [53] (2021年12月) 跟随plenotree的脚步，对场景进行了体素化，并存储了密度和球谐系数与方向相关的颜色的标量。然而，令人惊讶的是，Plenoxel完全跳过了MLP训练，而是将这些功能直接安装在体素网格上。他们还获得了与NeRF和JaxNeRF相当的结果，训练时间加快了几百倍。这些结果表明，NeRF模型的主要贡献是给定密度和颜色的新视图的体积渲染，而不是密度和颜色mlp本身。
+### TensorRF
+&emsp;&emsp;沿着无MLP辐射场的路线，TensorRF [55] (3月2022日) 也使用了无神经网络的体绘制。TensorRF在3D体素网格中存储了标量密度和矢量颜色特征 (SH谐波系数或要输入到小MLP中的颜色特征)，然后将其表示为秩3张量$T_\sigma∈ R^{H × W × D}$和秩4张量 $T_c∈ R^{H × W × D × C}$，其中H，W，D是体素网格的高度，宽度和深度分辨率，C是通道尺寸。然后，作者使用了两种因式分解方案: 将张量分解为纯矢量外积的candecompp-PARAFAC (CP) 和将张量分解为矢量/矩阵外积的矢量矩阵 (VM)。当使用CP时，这些分解将来自Plenoxels的内存需求降低了200倍。尽管需要更多内存，但它们的VM分解效果最佳。训练速度与Pleoxels相当，并且比基准NeRF模型快得多。
 ##  基于NeRF应用的分类树
 ### Urban 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/c5ad6204955548c58c39f3bbc5a5c3c3.png)
